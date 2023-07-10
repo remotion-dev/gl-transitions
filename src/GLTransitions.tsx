@@ -39,15 +39,15 @@ export const GLTransitions: React.FC<{
 		const gl =
 			(canvas.current as HTMLCanvasElement).getContext('webgl') ||
 			((canvas.current as HTMLCanvasElement).getContext(
-				'experimental-webgl'
+				'experimental-webgl',
 			) as WebGLRenderingContext);
 		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 		const buffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 		gl.bufferData(
 			gl.ARRAY_BUFFER,
-			new Float32Array([-1, -1, -1, 4, 4, -1]), // see a-big-triangle
-			gl.STATIC_DRAW
+			new Float32Array([-1, -1, -1, 4, 4, -1]), // See a-big-triangle
+			gl.STATIC_DRAW,
 		);
 		gl.viewport(0, 0, width, height);
 
@@ -61,7 +61,7 @@ export const GLTransitions: React.FC<{
 
 		const transition = createTransition(
 			gl,
-			transitions.find((t) => t.name === name)
+			transitions.find((t) => t.name === name),
 		); // https://github.com/gl-transitions/gl-transitions/blob/master/transitions/cube.glsl
 
 		setDrawFn(() => (frame: number) => {
