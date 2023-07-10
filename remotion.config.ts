@@ -1,6 +1,7 @@
-import {Config} from 'remotion';
+import {Config} from '@remotion/cli/config';
 
-Config.Output.setCodec('h264');
-Config.Output.setImageSequence(false);
-Config.Rendering.setImageFormat('jpeg');
-Config.Output.setOverwriteOutput(true);
+Config.setCodec('h264');
+Config.setImageSequence(false);
+Config.setVideoImageFormat('jpeg');
+Config.setOverwriteOutput(true);
+Config.setChromiumOpenGlRenderer('angle');
