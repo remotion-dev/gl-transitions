@@ -1,20 +1,9 @@
-import {Composition} from 'remotion';
+import {Composition, staticFile} from 'remotion';
 import {GLTransitions} from './GLTransitions';
 
 export const RemotionVideo: React.FC = () => {
 	return (
 		<>
-			<Composition
-				id="Directional"
-				component={GLTransitions}
-				durationInFrames={30}
-				fps={30}
-				width={1920}
-				height={1080}
-				defaultProps={{
-					name: 'Directional',
-				}}
-			/>
 			<Composition
 				id="Cube"
 				component={GLTransitions}
@@ -23,7 +12,19 @@ export const RemotionVideo: React.FC = () => {
 				width={1920}
 				height={1080}
 				defaultProps={{
-					name: 'cube',
+					name: staticFile('cube.glsl'),
+					paramsTypes: {
+						persp: 'float',
+						unzoom: 'float',
+						reflection: 'float',
+						floating: 'float',
+					},
+					defaultParams: {
+						persp: 0.7,
+						unzoom: 0.3,
+						reflection: 0.4,
+						floating: 3,
+					},
 				}}
 			/>
 			<Composition
@@ -34,7 +35,9 @@ export const RemotionVideo: React.FC = () => {
 				width={1920}
 				height={1080}
 				defaultProps={{
-					name: 'PolkaDotsCurtain',
+					name: staticFile('polkadot.glsl'),
+					paramsTypes: {dots: 'float', center: 'vec2'},
+					defaultParams: {dots: 20, center: [0, 0]},
 				}}
 			/>
 			<Composition
@@ -45,7 +48,9 @@ export const RemotionVideo: React.FC = () => {
 				width={1920}
 				height={1080}
 				defaultProps={{
-					name: 'cannabisleaf',
+					name: staticFile('cannabisleaf.glsl'),
+					paramsTypes: {},
+					defaultParams: {},
 				}}
 			/>
 			<Composition
@@ -56,7 +61,13 @@ export const RemotionVideo: React.FC = () => {
 				width={1920}
 				height={1080}
 				defaultProps={{
-					name: 'ButterflyWaveScrawler',
+					name: staticFile('butterflywavesrawler.glsl'),
+					paramsTypes: {
+						amplitude: 'float',
+						waves: 'float',
+						colorSeparation: 'float',
+					},
+					defaultParams: {amplitude: 1, waves: 30, colorSeparation: 0.3},
 				}}
 			/>
 		</>

@@ -1,15 +1,15 @@
 import createTexture from 'gl-texture2d';
-import createTransition from 'gl-transition';
 import transitions from 'gl-transitions';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
 	continueRender,
 	delayRender,
+	staticFile,
 	useCurrentFrame,
 	useVideoConfig,
 } from 'remotion';
-import one from './1.jpg';
-import two from './2.jpg';
+import {getCubeTransition} from './cube-transition';
+import {createTransition, DefaultParams, ParamsTypes} from './gl-transition';
 
 const loadImage = (src: string) =>
 	new Promise<HTMLImageElement>((resolve, reject) => {
@@ -26,7 +26,9 @@ const canvas = React.createRef<HTMLCanvasElement>();
 
 export const GLTransitions: React.FC<{
 	name: string;
-}> = ({name}) => {
+	paramsTypes: ParamsTypes;
+	defaultParams: DefaultParams;
+}> = ({name, defaultParams, paramsTypes}) => {
 	const [handle] = useState(() => delayRender());
 	const frame = useCurrentFrame();
 	const {fps, width, height} = useVideoConfig();
@@ -34,13 +36,17 @@ export const GLTransitions: React.FC<{
 	const [drawFn, setDrawFn] = useState<((frame: number) => void) | null>(null);
 
 	const initialize = useCallback(async () => {
-		const imageFrom = await loadImage(one);
-		const imageTo = await loadImage(two);
-		const gl =
-			(canvas.current as HTMLCanvasElement).getContext('webgl') ||
-			((canvas.current as HTMLCanvasElement).getContext(
-				'experimental-webgl',
-			) as WebGLRenderingContext);
+		const imageFrom = await loadImage(staticFile('1.jpg'));
+		const imageTo = await loadImage(staticFile('2.jpg'));
+		const cubeTransition = await getCubeTransition({
+			file: name,
+			defaultParams,
+			paramsTypes,
+		});
+		const gl = (canvas.current as HTMLCanvasElement).getContext(
+			'webgl',
+		) as WebGLRenderingContext;
+
 		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 		const buffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -59,10 +65,7 @@ export const GLTransitions: React.FC<{
 		to.minFilter = gl.LINEAR;
 		to.magFilter = gl.LINEAR;
 
-		const transition = createTransition(
-			gl,
-			transitions.find((t) => t.name === name),
-		); // https://github.com/gl-transitions/gl-transitions/blob/master/transitions/cube.glsl
+		const transition = createTransition(gl, cubeTransition); // https://github.com/gl-transitions/gl-transitions/blob/master/transitions/cube.glsl
 
 		setDrawFn(() => (frame: number) => {
 			transition.draw((frame / fps) % 1, from, to, width, height, {
@@ -71,7 +74,7 @@ export const GLTransitions: React.FC<{
 			});
 		});
 		continueRender(handle);
-	}, [fps, handle, height, name, width]);
+	}, [fps, handle, height, width]);
 
 	useEffect(() => {
 		initialize();
