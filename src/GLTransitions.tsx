@@ -1,6 +1,3 @@
-import createTexture from 'gl-texture2d';
-import createTransition from 'gl-transition';
-import transitions from 'gl-transitions';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
 	continueRender,
@@ -8,74 +5,39 @@ import {
 	useCurrentFrame,
 	useVideoConfig,
 } from 'remotion';
-import one from './1.jpg';
-import two from './2.jpg';
-
-const loadImage = (src: string) =>
-	new Promise<HTMLImageElement>((resolve, reject) => {
-		const img = new Image();
-		img.onload = () => resolve(img);
-		img.onerror = reject;
-		img.onabort = reject;
-		img.src = src;
-	});
-
-// ^ NB: we just assumed you have these 2 imageFrom and imageTo Image objects that have the image loaded and ready
+import {Params, ParamsTypes} from './gl-transition';
+import {DrawFn, initialize} from './init';
 
 const canvas = React.createRef<HTMLCanvasElement>();
 
 export const GLTransitions: React.FC<{
 	name: string;
-}> = ({name}) => {
+	paramsTypes: ParamsTypes;
+	defaultParams: Params;
+}> = ({name, defaultParams, paramsTypes}) => {
 	const [handle] = useState(() => delayRender());
 	const frame = useCurrentFrame();
 	const {fps, width, height} = useVideoConfig();
 
-	const [drawFn, setDrawFn] = useState<((frame: number) => void) | null>(null);
+	const [drawFn, setDrawFn] = useState<DrawFn | null>(null);
 
-	const initialize = useCallback(async () => {
-		const imageFrom = await loadImage(one);
-		const imageTo = await loadImage(two);
-		const gl =
-			(canvas.current as HTMLCanvasElement).getContext('webgl') ||
-			((canvas.current as HTMLCanvasElement).getContext(
-				'experimental-webgl',
-			) as WebGLRenderingContext);
-		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-		const buffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-		gl.bufferData(
-			gl.ARRAY_BUFFER,
-			new Float32Array([-1, -1, -1, 4, 4, -1]), // See a-big-triangle
-			gl.STATIC_DRAW,
-		);
-		gl.viewport(0, 0, width, height);
-
-		const from = createTexture(gl, imageFrom);
-		from.minFilter = gl.LINEAR;
-		from.magFilter = gl.LINEAR;
-
-		const to = createTexture(gl, imageTo);
-		to.minFilter = gl.LINEAR;
-		to.magFilter = gl.LINEAR;
-
-		const transition = createTransition(
-			gl,
-			transitions.find((t) => t.name === name),
-		); // https://github.com/gl-transitions/gl-transitions/blob/master/transitions/cube.glsl
-
-		setDrawFn(() => (frame: number) => {
-			transition.draw((frame / fps) % 1, from, to, width, height, {
-				persp: 1.5,
-				unzoom: 0.6,
-			});
+	const init = useCallback(async () => {
+		const fn = await initialize({
+			name,
+			defaultParams,
+			paramsTypes,
+			canvas: canvas.current as HTMLCanvasElement,
+			width,
+			height,
+			fps,
 		});
+		setDrawFn(fn);
 		continueRender(handle);
-	}, [fps, handle, height, name, width]);
+	}, [defaultParams, fps, handle, height, name, paramsTypes, width]);
 
 	useEffect(() => {
-		initialize();
-	}, [initialize]);
+		init();
+	}, [init]);
 
 	useEffect(() => {
 		if (drawFn) {
