@@ -61,13 +61,30 @@ export const RemotionVideo: React.FC = () => {
 				width={1920}
 				height={1080}
 				defaultProps={{
-					name: staticFile('butterflywavesrawler.glsl'),
+					name: staticFile('butterflywaverawler.glsl'),
 					paramsTypes: {
 						amplitude: 'float',
 						waves: 'float',
 						colorSeparation: 'float',
 					},
 					defaultParams: {amplitude: 1, waves: 30, colorSeparation: 0.3},
+				}}
+			/>
+			<Composition
+				id="ZoomBlur"
+				component={GLTransitions}
+				durationInFrames={120}
+				fps={30}
+				width={1920}
+				height={1080}
+				defaultProps={{
+					name: staticFile('zoomblur.glsl'),
+					paramsTypes: {
+						strength: 'float',
+					},
+					defaultParams: {
+						strength: 0.3,
+					},
 				}}
 			/>
 		</>

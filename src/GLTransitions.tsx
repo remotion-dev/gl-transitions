@@ -1,5 +1,4 @@
 import createTexture from 'gl-texture2d';
-import transitions from 'gl-transitions';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
 	continueRender,
@@ -68,13 +67,13 @@ export const GLTransitions: React.FC<{
 		const transition = createTransition(gl, cubeTransition); // https://github.com/gl-transitions/gl-transitions/blob/master/transitions/cube.glsl
 
 		setDrawFn(() => (frame: number) => {
-			transition.draw((frame / fps) % 1, from, to, width, height, {
+			transition.draw(frame / fps, from, to, width, height, {
 				persp: 1.5,
 				unzoom: 0.6,
 			});
 		});
 		continueRender(handle);
-	}, [fps, handle, height, width]);
+	}, [defaultParams, fps, handle, height, name, paramsTypes, width]);
 
 	useEffect(() => {
 		initialize();
