@@ -19,6 +19,8 @@
 		"@types/express": "^4.17.9",
 		"gl-shader": "^4.2.1",
 		"@types/react": "^17.0.0",
+		"@types/gl-shader": "^4.2.5",
+		"@types/gl-texture2d": "^2.1.6",
 		"buffer": "^6.0.3",
 		"eslint": "^7.15.0",
 		"express": "^4.17.1",

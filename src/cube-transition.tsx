@@ -1,8 +1,4 @@
-import {
-	DefaultParams,
-	ParamsTypes,
-	TransitionObjectLike,
-} from './gl-transition';
+import {Params, ParamsTypes, TransitionObjectLike} from './gl-transition';
 
 export const getCubeTransition = async ({
 	file,
@@ -11,7 +7,7 @@ export const getCubeTransition = async ({
 }: {
 	file: string;
 	paramsTypes: ParamsTypes;
-	defaultParams: DefaultParams;
+	defaultParams: Params;
 }): Promise<TransitionObjectLike> => {
 	const shader = await fetch(file).then((res) => res.text());
 

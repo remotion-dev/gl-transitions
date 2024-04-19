@@ -1,6 +1,6 @@
 import createShader from 'gl-shader';
 
-export type DefaultParams = {
+export type Params = {
 	[key: string]: unknown;
 };
 
@@ -10,7 +10,7 @@ export type ParamsTypes = {
 
 export type TransitionObjectLike = {
 	glsl: string;
-	defaultParams: DefaultParams;
+	defaultParams: Params;
 	paramsTypes: ParamsTypes;
 };
 
@@ -20,7 +20,7 @@ type GLTextureLike = {
 };
 
 type Options = {
-	resizeMode?: 'cover' | 'contain' | 'stretch';
+	resizeMode: 'cover' | 'contain' | 'stretch';
 };
 
 const VERT = `attribute vec2 _p;
@@ -54,22 +54,29 @@ void main(){gl_FragColor=transition(_uv);}`;
 export const createTransition = (
 	gl: WebGLRenderingContext,
 	transition: TransitionObjectLike,
-	options: Options = {},
+	options: Options,
 ) => {
-	const {resizeMode} = {resizeMode: 'cover', ...options};
+	const {resizeMode} = options;
 	const shader = createShader(gl, VERT, makeFrag(transition.glsl, resizeMode));
 	shader.bind();
 	shader.attributes._p.pointer();
 
 	return {
-		draw(
-			progress: number,
-			from: GLTextureLike,
-			to: GLTextureLike,
-			width: number = gl.drawingBufferWidth,
-			height: number = gl.drawingBufferHeight,
-			params: {[key: string]: unknown} = {},
-		) {
+		draw({
+			from,
+			height = gl.drawingBufferHeight,
+			params,
+			progress,
+			to,
+			width = gl.drawingBufferWidth,
+		}: {
+			progress: number;
+			from: GLTextureLike;
+			to: GLTextureLike;
+			width: number;
+			height: number;
+			params: Params;
+		}) {
 			shader.bind();
 			shader.uniforms.ratio = width / height;
 			shader.uniforms.progress = progress;
@@ -78,24 +85,21 @@ export const createTransition = (
 			shader.uniforms._fromR = from.shape[0] / from.shape[1];
 			shader.uniforms._toR = to.shape[0] / to.shape[1];
 			let unit = 2;
-			for (const key in transition.paramsTypes) {
-				const value =
-					key in params ? params[key] : transition.defaultParams[key];
+			for (const key of Object.keys(transition.paramsTypes)) {
+				const value = params[key] ?? transition.defaultParams[key];
 				if (transition.paramsTypes[key] === 'sampler2D') {
 					if (!value) {
 						console.warn(
-							'uniform[' +
-								key +
-								']: A texture MUST be defined for uniform sampler2D of a texture',
+							`uniform[${key}]: A texture MUST be defined for uniform sampler2D of a texture`,
 						);
-					} else if (typeof value.bind !== 'function') {
+					} else if (typeof value === 'function') {
+						shader.uniforms[key] = value.bind(unit++);
+					} else {
 						throw new Error(
 							'uniform[' +
 								key +
 								']: A gl-texture2d API-like object was expected',
 						);
-					} else {
-						shader.uniforms[key] = value.bind(unit++);
 					}
 				} else {
 					shader.uniforms[key] = value;

@@ -61,7 +61,7 @@ export const RemotionVideo: React.FC = () => {
 				width={1920}
 				height={1080}
 				defaultProps={{
-					name: staticFile('butterflywaverawler.glsl'),
+					name: staticFile('butterflywavecrawler.glsl'),
 					paramsTypes: {
 						amplitude: 'float',
 						waves: 'float',
